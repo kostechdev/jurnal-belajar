@@ -21,6 +21,7 @@ class Guru extends Model
         'nama_lengkap',
         'alamat',
         'no_telepon',
+        'tanggal_lahir',
     ];
 
     /**

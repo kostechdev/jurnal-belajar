@@ -14,26 +14,25 @@ class KelasSeeder extends Seeder
      */
     public function run(): void
     {
-        $tahunAjaran = TahunAjaran::where('aktif', true)->first();
+        $jurusans = [
+            'Nautika Kapal Niaga',
+            'Teknika Kapal Niaga',
+            'Teknik Mekanik Industri (TEKNIK MESIN)',
+            'Menejemen Perkantoran',
+        ];
 
-        if ($tahunAjaran) {
-            $jurusans = [
-                'Neutika Kapal Niaga',
-                'Teknika Kapal Niaga',
-                'Teknik Mekanik Industri',
-                'Menejemen Perkantoran',
-            ];
+        $tingkats = ['X', 'XI', 'XII'];
+        $rombels = ['1', '2', '3'];
 
+        foreach ($tingkats as $tingkat) {
             foreach ($jurusans as $jurusan) {
-                Kelas::firstOrCreate(
-                    [
-                        'nama_kelas' => 'X ' . $jurusan,
-                        'tahun_ajaran_id' => $tahunAjaran->id,
-                    ],
-                    [
+                foreach ($rombels as $rombel) {
+                    Kelas::create([
+                        'tingkat' => $tingkat,
                         'jurusan' => $jurusan,
-                    ]
-                );
+                        'rombel' => $rombel,
+                    ]);
+                }
             }
         }
     }

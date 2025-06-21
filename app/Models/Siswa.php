@@ -23,7 +23,9 @@ class Siswa extends Model
         'tanggal_lahir',
         'jenis_kelamin',
         'alamat',
-        'no_telepon_wali',
+        'nomor_telepon_siswa',
+        'nama_wali_murid',
+        'nomor_telepon_wali_murid',
         'kelas_id',
         'status_siswa',
     ];

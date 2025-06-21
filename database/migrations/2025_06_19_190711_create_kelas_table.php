@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('kelas', function (Blueprint $table) {
             $table->id('kelas_id');
-            $table->string('nama_kelas');
-            $table->string('jurusan')->nullable();
-            $table->foreignId('tahun_ajaran_id')->constrained('tahun_ajaran');
+            $table->enum('tingkat', ['X', 'XI', 'XII']);
+            $table->string('jurusan');
+            $table->string('rombel');
             $table->timestamps();
             $table->softDeletes();
+
+            $table->unique(['tingkat', 'jurusan', 'rombel']);
         });
     }
 
