@@ -4,6 +4,7 @@ import type { Config } from 'ziggy-js';
 export interface PageProps extends Record<string, unknown> {
     auth: {
         user: User;
+        is_wali_kelas: boolean;
     };
     flash: {
         success?: string;
@@ -22,22 +23,52 @@ export interface NavGroup {
     items: NavItem[];
 }
 
-export interface NavItem {
+export type NavItem = {
     title: string;
     href: string;
-    icon?: LucideIcon | null;
+    icon?: LucideIcon;
+    children?: NavItem[];
+    permission?: string;
     isActive?: boolean;
-}
+};
+
+export type RekapSiswa = {
+    siswa_id: number;
+    nama_lengkap: string;
+    nis: string;
+    stats: {
+        hadir: number;
+        sakit: number;
+        izin: number;
+        alpa: number;
+    };
+};
+
+export type Guru = {
+    guru_id: number;
+    user_id: number;
+    NIP: string;
+    nama_lengkap: string;
+    alamat: string;
+    nomor_telepon: string;
+    tanggal_lahir: string;
+};
 
 export interface User {
     id: number;
     name: string;
     email: string;
-    role: 'kurikulum' | 'guru' | 'wali_kelas';
-    avatar?: string;
     email_verified_at: string | null;
+    role: 'kurikulum' | 'guru' | 'wali_kelas';
+    guru?: Guru;
+    avatar?: string;
     created_at: string;
     updated_at: string;
+}
+
+export interface FlashMessage {
+    success?: string;
+    error?: string;
 }
 
 export interface PaginationLinkItem {
@@ -70,6 +101,8 @@ export interface Guru {
     alamat: string | null;
     nomor_telepon: string | null;
     tanggal_lahir: string | null;
+    tempat_lahir: string | null;
+    jenis_kelamin: 'L' | 'P' | null;
     user?: User;
 }
 
@@ -90,6 +123,7 @@ export interface Kelas {
     tingkat: 'X' | 'XI' | 'XII';
     jurusan: string;
     rombel: string;
+    nama_kelas: string;
     siswa?: Siswa[];
 }
 
@@ -184,16 +218,18 @@ export interface SiswaFormPageProps extends PageProps {
 
 export interface Jadwal {
     jadwal_id: number;
-    hari: 'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat';
+    hari: string;
     jam_mulai: string;
     jam_selesai: string;
-    mapel_id: number;
     guru_id: number;
+    mapel_id: number;
     kelas_id: number;
     tahun_ajaran_id: number;
+    sudah_diisi?: boolean;
+    jurnal_id?: number;
+    kelas: Kelas;
     mapel: Mapel;
     guru: Guru;
-    kelas: Kelas;
 }
 
 export interface JadwalIndexPageProps extends PageProps {
@@ -209,15 +245,54 @@ export interface JadwalFormPageProps extends PageProps {
     tahunAjaranAktif: TahunAjaran;
 }
 
-export type JurnalMengajar = {
+export interface JurnalMengajar {
     jurnal_id: number;
     jadwal_id: number;
     tanggal: string;
-    materi: string;
-    jam_ke: string;
-    keterangan: string | null;
-    is_libur: boolean;
+    catatan_mengajar: string;
+    status: string;
+    diinput_oleh_guru_id: number;
     created_at: string;
     updated_at: string;
     jadwal: Jadwal;
-};
+    kehadiran: Kehadiran[];
+}
+
+export interface Kehadiran {
+    kehadiran_id: number;
+    jurnal_id: number;
+    siswa_id: number;
+    tanggal_kehadiran: string;
+    status_kehadiran: 'Hadir' | 'Sakit' | 'Izin' | 'Alpa';
+    siswa: Siswa;
+}
+
+export interface RekapKehadiran {
+    total: number;
+    hadir: number;
+    sakit: number;
+    izin: number;
+    alpa: number;
+}
+
+export interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
+export interface PaginatedResponse<T> {
+    current_page: number;
+    data: T[];
+    first_page_url: string;
+    from: number;
+    last_page: number;
+    last_page_url: string;
+    links: PaginationLink[];
+    next_page_url: string | null;
+    path: string;
+    per_page: number;
+    prev_page_url: string | null;
+    to: number;
+    total: number;
+}

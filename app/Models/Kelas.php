@@ -17,10 +17,23 @@ class Kelas extends Model
     protected $primaryKey = 'kelas_id';
 
     protected $fillable = [
-        'nama_kelas',
+        'tingkat',
         'jurusan',
+        'rombel',
         'tahun_ajaran_id',
     ];
+
+    protected $appends = ['nama_kelas'];
+
+    /**
+     * Get the full name of the class.
+     *
+     * @return string
+     */
+    public function getNamaKelasAttribute(): string
+    {
+        return "{$this->tingkat} {$this->jurusan} {$this->rombel}";
+    }
 
     /**
      * Get the tahun ajaran that owns the Kelas.

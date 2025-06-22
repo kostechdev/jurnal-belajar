@@ -20,8 +20,10 @@ class Guru extends Model
         'NIP',
         'nama_lengkap',
         'alamat',
-        'no_telepon',
+        'nomor_telepon',
         'tanggal_lahir',
+        'tempat_lahir',
+        'jenis_kelamin',
     ];
 
     /**

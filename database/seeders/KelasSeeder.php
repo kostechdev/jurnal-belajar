@@ -27,7 +27,7 @@ class KelasSeeder extends Seeder
         foreach ($tingkats as $tingkat) {
             foreach ($jurusans as $jurusan) {
                 foreach ($rombels as $rombel) {
-                    Kelas::create([
+                    Kelas::firstOrCreate([
                         'tingkat' => $tingkat,
                         'jurusan' => $jurusan,
                         'rombel' => $rombel,

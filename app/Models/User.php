@@ -20,7 +20,6 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
         'email',
         'password',
         'role',
@@ -35,6 +34,13 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['name'];
 
     /**
      * Get the attributes that should be cast.
@@ -70,11 +76,45 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the user's name.
+     *
+     * @return string
+     */
+    public function getNameAttribute(): string
+    {
+        if ($this->kurikulum) {
+            return $this->kurikulum->nama_lengkap;
+        }
+
+        if ($this->guru) {
+            return $this->guru->nama_lengkap;
+        }
+
+        return 'User'; // Fallback
+    }
+
+    /**
      * Scope a query to only include admin users.
      */
     public function scopeAdmin(Builder $query): void
     {
         $query->where('role', 'admin');
+    }
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::deleting(function (User $user) {
+            // Hapus data terkait di tabel guru atau kurikulum
+            if ($user->guru) {
+                $user->guru->delete();
+            }
+            if ($user->kurikulum) {
+                $user->kurikulum->delete();
+            }
+        });
     }
 
     /**
@@ -96,8 +136,5 @@ class User extends Authenticatable
     /**
      * Scope a query to only include wali kelas users.
      */
-    public function scopeWaliKelas(Builder $query): void
-    {
-        $query->where('role', 'wali_kelas');
-    }
+
 }

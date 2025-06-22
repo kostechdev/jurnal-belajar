@@ -29,17 +29,18 @@ class GuruController extends Controller
     {
         $validated = $request->validate([
             'nama_lengkap' => 'required|string|max:255',
-            'NIP' => 'required|string|unique:guru,NIP',
+            'NIP' => 'required|string|digits:18|unique:guru,NIP',
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:3|confirmed',
             'alamat' => 'nullable|string',
-            'nomor_telepon' => 'nullable|string|max:20',
+            'nomor_telepon' => 'nullable|string|max:15',
             'tanggal_lahir' => 'nullable|date',
+            'tempat_lahir' => 'nullable|string|max:255',
+            'jenis_kelamin' => ['nullable', Rule::in(['L', 'P'])],
         ]);
 
         DB::transaction(function () use ($validated) {
             $user = User::create([
-                'name' => $validated['nama_lengkap'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
                 'role' => 'guru',
@@ -51,6 +52,8 @@ class GuruController extends Controller
                 'alamat' => $validated['alamat'],
                 'nomor_telepon' => $validated['nomor_telepon'],
                 'tanggal_lahir' => $validated['tanggal_lahir'],
+                'tempat_lahir' => $validated['tempat_lahir'],
+                'jenis_kelamin' => $validated['jenis_kelamin'],
             ]);
         });
 
@@ -68,20 +71,26 @@ class GuruController extends Controller
     {
         $validated = $request->validate([
             'nama_lengkap' => 'required|string|max:255',
-            'NIP' => ['required', 'string', Rule::unique('guru')->ignore($guru->guru_id, 'guru_id')],
+            'NIP' => ['required', 'string', 'digits:18', Rule::unique('guru')->ignore($guru->guru_id, 'guru_id')],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($guru->user_id)],
             'password' => 'nullable|string|min:3|confirmed',
             'alamat' => 'nullable|string',
-            'nomor_telepon' => 'nullable|string|max:20',
+            'nomor_telepon' => 'nullable|string|max:15',
             'tanggal_lahir' => 'nullable|date',
+            'tempat_lahir' => 'nullable|string|max:255',
+            'jenis_kelamin' => ['nullable', Rule::in(['L', 'P'])],
         ]);
 
         DB::transaction(function () use ($validated, $guru) {
             $guru->user()->update([
-                'name' => $validated['nama_lengkap'],
                 'email' => $validated['email'],
-                'password' => isset($validated['password']) ? Hash::make($validated['password']) : $guru->user->password,
             ]);
+
+            if (!empty($validated['password'])) {
+                $guru->user()->update([
+                    'password' => Hash::make($validated['password']),
+                ]);
+            }
 
             $guru->update([
                 'NIP' => $validated['NIP'],
@@ -89,6 +98,8 @@ class GuruController extends Controller
                 'alamat' => $validated['alamat'],
                 'nomor_telepon' => $validated['nomor_telepon'],
                 'tanggal_lahir' => $validated['tanggal_lahir'],
+                'tempat_lahir' => $validated['tempat_lahir'],
+                'jenis_kelamin' => $validated['jenis_kelamin'],
             ]);
         });
 
@@ -97,11 +108,16 @@ class GuruController extends Controller
 
     public function destroy(Guru $guru)
     {
-        DB::transaction(function () use ($guru) {
-            $guru->user()->delete(); // Soft delete user
-            $guru->delete(); // Soft delete guru
-        });
+        try {
+            DB::transaction(function () use ($guru) {
+                // Dengan menghapus user, data guru yang terkait akan ikut terhapus
+                // berkat event 'deleting' pada model User.
+                $guru->user->delete();
+            });
 
-        return redirect()->route('kurikulum.guru.index')->with('success', 'Data guru berhasil dihapus.');
+            return redirect()->route('kurikulum.guru.index')->with('success', 'Data guru berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()->route('kurikulum.guru.index')->with('error', 'Gagal menghapus data guru. Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 }

@@ -29,13 +29,32 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $validated = $request->validated();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        // Update user data
+        $user->fill([
+            'name' => $validated['nama_lengkap'], // Set name from nama_lengkap
+            'email' => $validated['email'],
+        ]);
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
+
+        // Update or create guru data
+        $user->guru()->updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'NIP' => $validated['NIP'],
+                'nama_lengkap' => $validated['nama_lengkap'],
+                'alamat' => $validated['alamat'],
+                'nomor_telepon' => $validated['nomor_telepon'],
+                'tanggal_lahir' => $validated['tanggal_lahir'],
+            ]
+        );
 
         return to_route('profile.edit');
     }

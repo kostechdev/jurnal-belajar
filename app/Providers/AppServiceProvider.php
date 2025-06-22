@@ -2,10 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\JurnalMengajar;
+use App\Policies\JurnalMengajarPolicy;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
+
     /**
      * Register any application services.
      */
@@ -19,6 +23,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Gate::policy(JurnalMengajar::class, JurnalMengajarPolicy::class);
     }
 }

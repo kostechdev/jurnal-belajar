@@ -5,6 +5,8 @@ namespace App\Http\Middleware;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use App\Models\TahunAjaran;
+use App\Models\WaliKelas;
 use Tighten\Ziggy\Ziggy;
 
 class HandleInertiaRequests extends Middleware
@@ -44,7 +46,21 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $request->user(),
+                'user' => $request->user() ? $request->user()->load('guru') : null,
+                'is_wali_kelas' => function () use ($request) {
+                    if (!$request->user() || !$request->user()->guru) {
+                        return false;
+                    }
+
+                    $tahunAjaranAktif = TahunAjaran::where('status', 'Aktif')->first();
+                    if (!$tahunAjaranAktif) {
+                        return false;
+                    }
+
+                    return WaliKelas::where('guru_id', $request->user()->guru->guru_id)
+                        ->where('tahun_ajaran_id', $tahunAjaranAktif->id)
+                        ->exists();
+                },
             ],
             'ziggy' => fn (): array => [
                 ...(new Ziggy)->toArray(),

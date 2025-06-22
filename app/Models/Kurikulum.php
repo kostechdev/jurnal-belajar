@@ -19,7 +19,10 @@ class Kurikulum extends Model
         'NIP_NIDN',
         'nama_lengkap',
         'alamat',
-        'no_telepon',
+        'nomor_telepon',
+        'tanggal_lahir',
+        'tempat_lahir',
+        'jenis_kelamin',
     ];
 
     /**

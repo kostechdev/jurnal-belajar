@@ -24,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
+            'is_wali_kelas' => \App\Http\Middleware\IsWaliKelas::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -1,10 +1,10 @@
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type NavItem } from '@/types';
+import { type NavItem, type User } from '@/types';
 import { Link } from '@inertiajs/react';
 import { cn } from '@/lib/utils';
-import { GraduationCap, LayoutDashboard, Users, ClipboardList, CalendarDays, School, Book, Contact } from 'lucide-react';
+import { GraduationCap, LayoutDashboard, Users, ClipboardList, CalendarDays, School, Book, Contact, ClipboardCheck, FileText } from 'lucide-react';
 import AppLogo from './app-logo';
 import { usePage } from '@inertiajs/react';
 import { type PageProps } from '@/types';
@@ -14,20 +14,26 @@ type NavItemGroup = {
     items: NavItem[];
 };
 
-const getMainNavItems = (role: string): NavItemGroup[] => {
-    const dashboardGroup: NavItemGroup = {
-        title: '',
-        items: [
-            {
-                title: 'Dashboard',
-                href: '/dashboard',
-                icon: LayoutDashboard,
-                isActive: route().current('dashboard'),
-            },
-        ],
-    };
+const getMainNavItems = (user: User | undefined, isWaliKelas: boolean): NavItemGroup[] => {
+    if (!user) {
+        return [];
+    }
+    const { role } = user;
+    const navGroups: NavItemGroup[] = [];
 
+    // --- Kurikulum Menu ---
     if (role === 'kurikulum') {
+        const dashboardGroup: NavItemGroup = {
+            title: '',
+            items: [
+                {
+                    title: 'Dashboard',
+                    href: route('kurikulum.dashboard'),
+                    icon: LayoutDashboard,
+                    isActive: route().current('kurikulum.dashboard'),
+                },
+            ],
+        };
         const akademikGroup: NavItemGroup = {
             title: 'Manajemen Akademik',
             items: [
@@ -45,7 +51,6 @@ const getMainNavItems = (role: string): NavItemGroup[] => {
                 },
             ],
         };
-
         const masterDataGroup: NavItemGroup = {
             title: 'Master Data',
             items: [
@@ -81,7 +86,6 @@ const getMainNavItems = (role: string): NavItemGroup[] => {
                 },
             ],
         };
-
         const administrasiGroup: NavItemGroup = {
             title: 'Administrasi',
             items: [
@@ -93,16 +97,87 @@ const getMainNavItems = (role: string): NavItemGroup[] => {
                 },
             ],
         };
-
         return [dashboardGroup, akademikGroup, masterDataGroup, administrasiGroup];
     }
 
-    return [dashboardGroup];
+    // --- Guru Menu ---
+    if (role === 'guru') {
+        const guruDashboard: NavItemGroup = {
+            title: '',
+            items: [
+                {
+                    title: 'Dashboard',
+                    href: route('guru.dashboard'),
+                    icon: LayoutDashboard,
+                    isActive: route().current('guru.dashboard'),
+                },
+            ],
+        };
+        const jurnalGroup: NavItemGroup = {
+            title: 'Jurnal Mengajar',
+            items: [
+                {
+                    title: 'Riwayat Jurnal',
+                    href: route('guru.jurnal.index'),
+                    icon: ClipboardList,
+                    isActive: route().current('guru.jurnal.*'),
+                },
+            ],
+        };
+        navGroups.push(guruDashboard, jurnalGroup);
+    }
+
+    // --- Wali Kelas Menu (Additional) ---
+    if (isWaliKelas) {
+        const waliKelasGroup: NavItemGroup = {
+            title: 'Wali Kelas',
+            items: [
+                {
+                    title: 'Dashboard',
+                    href: route('wali-kelas.dashboard'),
+                    icon: LayoutDashboard,
+                    isActive: route().current('wali-kelas.dashboard'),
+                },
+                {
+                    title: 'Rekap Absensi',
+                    href: route('wali-kelas.wali-kelas.absensi.index'),
+                    icon: ClipboardCheck,
+                    isActive: route().current('wali-kelas.wali-kelas.absensi.*'),
+                },
+                {
+                    title: 'Laporan Absensi',
+                    href: route('wali-kelas.wali-kelas.laporan.index'),
+                    icon: FileText,
+                    isActive: route().current('wali-kelas.wali-kelas.laporan.*'),
+                },
+            ],
+        };
+        navGroups.push(waliKelasGroup);
+    }
+
+    // --- Fallback Menu ---
+    if (navGroups.length === 0) {
+        const dashboardGroup: NavItemGroup = {
+            title: '',
+            items: [
+                {
+                    title: 'Dashboard',
+                    href: '/dashboard',
+                    icon: LayoutDashboard,
+                    isActive: route().current('dashboard'),
+                },
+            ],
+        };
+        return [dashboardGroup];
+    }
+
+    return navGroups;
 };
 
 export function AppSidebar() {
     const { auth } = usePage<PageProps>().props;
-    const mainNavGroups = getMainNavItems(auth.user.role);
+    const { user, is_wali_kelas: isWaliKelas } = auth;
+    const mainNavGroups = getMainNavItems(user, isWaliKelas);
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -122,7 +197,7 @@ export function AppSidebar() {
                     <div key={group.title}>
                         {index > 0 && <hr className="my-3" />}
                         {group.title && (
-                            <h4 className="mb-2 mt-3 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground/80">
+                            <h4 className="mb-2 mt-3 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground">
                                 {group.title}
                             </h4>
                         )}

@@ -35,6 +35,7 @@ class DashboardController extends Controller
         ];
 
         $recentActivities = JurnalMengajar::with(['jadwal.guru', 'jadwal.mapel', 'jadwal.kelas'])
+            ->whereHas('jadwal.guru') // Memastikan guru masih ada
             ->latest('created_at')
             ->take(5)
             ->get();

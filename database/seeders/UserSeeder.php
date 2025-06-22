@@ -22,7 +22,6 @@ class UserSeeder extends Seeder
             $kurikulumUser = User::firstOrCreate(
                 ['email' => 'kurikulum@smkn4cilegon.sch.id'],
                 [
-                    'name' => 'Staf Kurikulum',
                     'password' => Hash::make('123'),
                     'role' => 'kurikulum'
                 ]
@@ -31,7 +30,7 @@ class UserSeeder extends Seeder
                 Kurikulum::create([
                     'user_id' => $kurikulumUser->id,
                     'NIP_NIDN' => 'K123456789',
-                    'nama_lengkap' => $kurikulumUser->name // Menambahkan nama lengkap
+                    'nama_lengkap' => 'Staf Kurikulum'
                 ]);
             }
 
@@ -39,7 +38,6 @@ class UserSeeder extends Seeder
             $guruUser = User::firstOrCreate(
                 ['email' => 'guru@smkn4cilegon.sch.id'],
                 [
-                    'name' => 'Guru Pengajar',
                     'password' => Hash::make('123'),
                     'role' => 'guru'
                 ]
@@ -48,7 +46,7 @@ class UserSeeder extends Seeder
                 Guru::create([
                     'user_id' => $guruUser->id, 
                     'nip' => '1234567890',
-                    'nama_lengkap' => $guruUser->name
+                    'nama_lengkap' => 'Guru Pengajar'
                 ]);
             }
 
@@ -56,16 +54,15 @@ class UserSeeder extends Seeder
             $waliKelasUser = User::firstOrCreate(
                 ['email' => 'walikelas@smkn4cilegon.sch.id'],
                 [
-                    'name' => 'Wali Kelas',
                     'password' => Hash::make('123'),
-                    'role' => 'wali_kelas'
+                    'role' => 'guru'
                 ]
             );
             if ($waliKelasUser->wasRecentlyCreated) {
                 Guru::create([
                     'user_id' => $waliKelasUser->id, 
-                    'nip' => '0987654321',
-                    'nama_lengkap' => $waliKelasUser->name
+                    'NIP' => '0987654321', // Kolom diubah ke NIP
+                    'nama_lengkap' => 'Wali Kelas'
                 ]);
             }
         });
